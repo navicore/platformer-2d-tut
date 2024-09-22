@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install ALSA dev libraries
-      run: sudo apt-get update && sudo apt-get install -y libasound2-dev
+    - name: Install ALSA and Udev dev libraries
+      run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev
     - name: Set up Rust
       uses: actions-rs/toolchain@v1
       with:
