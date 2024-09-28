@@ -1,4 +1,8 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle, window::WindowResolution};
+use bevy_rapier2d::{
+    plugin::{NoUserData, RapierPhysicsPlugin},
+    render::RapierDebugRenderPlugin,
+};
 
 const COLOR_BACKGROUND: Color = Color::rgb(0.29, 0.31, 0.41);
 const COLOR_PLATFORM: Color = Color::rgb(0.13, 0.13, 0.23);
@@ -20,6 +24,8 @@ fn main() {
             }),
             ..Default::default()
         }))
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(200.0)) // Physics plugin
+        .add_plugin(RapierDebugRenderPlugin::default()) // Debug pl
         .add_startup_system(setup)
         .run();
 }
