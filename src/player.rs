@@ -1,6 +1,9 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
+use crate::{WINDOW_BOTTOM_Y, WINDOW_LEFT_X};
+
+const COLOR_PLAYER: Color = Color::rgb(0.60, 0.55, 0.60);
 const MAX_JUMP_HEIGHT: f32 = 230.0;
 const PLAYER_VELOCITY_X: f32 = 400.0;
 const PLAYER_VELOCITY_Y: f32 = 850.0;
@@ -21,7 +24,26 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn setup(_commands: Commands) {}
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    commands
+        .spawn(MaterialMesh2dBundle {
+            mesh: meshes.add(shape::Circle::default().into()).into(),
+            material: materials.add(ColorMaterial::from(COLOR_PLAYER)),
+            transform: Transform {
+                translation: Vec3::new(WINDOW_LEFT_X + 100.0, WINDOW_BOTTOM_Y + 30.0, 0.0),
+                scale: Vec3::new(30.0, 30.0, 1.0),
+                ..Default::default()
+            },
+            ..default()
+        })
+        .insert(RigidBody::KinematicPositionBased)
+        .insert(Collider::ball(0.5))
+        .insert(KinematicCharacterController::default());
+}
 
 fn fall(time: Res<Time>, mut query: Query<&mut KinematicCharacterController, Without<Jump>>) {
     if query.is_empty() {
