@@ -5,6 +5,7 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{animation::Animation, WINDOW_BOTTOM_Y, WINDOW_LEFT_X};
 
+const SPRITE_IDX_JUMP: usize = 2;
 const SPRITE_RENDER_WIDTH: f32 = 64.0;
 const SPRITE_RENDER_HEIGHT: f32 = 128.0;
 const SPRITESHEET_COLS: usize = 7;
@@ -33,8 +34,17 @@ impl Plugin for PlayerPlugin {
             .add_system(rise)
             .add_system(fall)
             .add_system(apply_movement_animation)
-            .add_system(apply_idle_sprite);
+            .add_system(apply_idle_sprite)
+            .add_system(apply_jump_sprite)
+            .add_system(update_direction)
+            .add_system(update_sprite_direction);
     }
+}
+
+#[derive(Component)]
+enum Direction {
+    Right,
+    Left,
 }
 
 fn setup(
@@ -73,7 +83,8 @@ fn setup(
             SPRITE_TILE_WIDTH / 2.0,
             SPRITE_TILE_HEIGHT / 2.0,
         ))
-        .insert(KinematicCharacterController::default());
+        .insert(KinematicCharacterController::default())
+        .insert(Direction::Right); // default direction
 }
 
 fn fall(time: Res<Time>, mut query: Query<&mut KinematicCharacterController, Without<Jump>>) {
@@ -192,5 +203,54 @@ fn apply_idle_sprite(
     if output.desired_translation.x == 0.0 && output.grounded {
         commands.entity(player).remove::<Animation>();
         sprite.index = SPRITE_IDX_STAND
+    }
+}
+
+fn apply_jump_sprite(
+    mut commands: Commands,
+    mut query: Query<(
+        Entity,
+        &KinematicCharacterControllerOutput,
+        &mut TextureAtlasSprite,
+    )>,
+) {
+    if query.is_empty() {
+        return;
+    }
+
+    let (player, output, mut sprite) = query.single_mut();
+    if !output.grounded {
+        commands.entity(player).remove::<Animation>();
+        sprite.index = SPRITE_IDX_JUMP
+    }
+}
+
+fn update_direction(
+    mut commands: Commands,
+    query: Query<(Entity, &KinematicCharacterControllerOutput)>,
+) {
+    if query.is_empty() {
+        return;
+    }
+
+    let (player, output) = query.single();
+
+    if output.desired_translation.x > 0.0 {
+        commands.entity(player).insert(Direction::Right);
+    } else if output.desired_translation.x < 0.0 {
+        commands.entity(player).insert(Direction::Left);
+    }
+}
+
+fn update_sprite_direction(mut query: Query<(&mut TextureAtlasSprite, &Direction)>) {
+    if query.is_empty() {
+        return;
+    }
+
+    let (mut sprite, direction) = query.single_mut();
+
+    match direction {
+        Direction::Right => sprite.flip_x = false,
+        Direction::Left => sprite.flip_x = true,
     }
 }
