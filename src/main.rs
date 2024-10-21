@@ -1,6 +1,8 @@
+mod animation;
 mod platforms;
 mod player;
 
+use animation::AnimationPlugin;
 use platforms::PlatformsPlugin;
 use player::PlayerPlugin;
 
@@ -37,6 +39,7 @@ fn main() {
         .add_plugin(RapierDebugRenderPlugin::default()) // Debug pl
         .add_plugin(PlatformsPlugin)
         .add_plugin(PlayerPlugin)
+        .add_plugin(AnimationPlugin)
         .add_startup_system(setup)
         .run();
 }
