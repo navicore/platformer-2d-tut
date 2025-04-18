@@ -6,7 +6,10 @@ use animation::AnimationPlugin;
 use platforms::PlatformsPlugin;
 use player::PlayerPlugin;
 
-use bevy::{prelude::*, window::WindowResolution};
+use bevy::{
+    prelude::*,
+    window::{close_on_esc, WindowResolution},
+};
 use bevy_rapier2d::{
     dynamics::RigidBody,
     geometry::Collider,
@@ -41,6 +44,7 @@ fn main() {
         .add_plugin(PlayerPlugin)
         .add_plugin(AnimationPlugin)
         .add_startup_system(setup)
+        .add_system(close_on_esc)
         .run();
 }
 
